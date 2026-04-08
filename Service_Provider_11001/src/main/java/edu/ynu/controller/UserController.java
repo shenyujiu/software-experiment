@@ -12,7 +12,6 @@ public class UserController {
 
     @GetMapping("/get/{id}")
     public User getUserById(@PathVariable("id") Integer id) {
-        // 模拟从数据库获取数据
         return new User(id, "User_" + id, "password" + id);
     }
 }

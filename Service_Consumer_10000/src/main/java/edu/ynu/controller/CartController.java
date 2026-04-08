@@ -1,24 +1,30 @@
 package edu.ynu.controller;
 
 import edu.ynu.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/cart")
 public class CartController {
 
-    @Autowired
+    @Resource
     private RestTemplate restTemplate;
-
+    @Resource
+    private DiscoveryClient discoveryClient;
     @GetMapping("/get/{id}")
     public User getUserById(@PathVariable("id") Integer id) {
-        // 使用服务名进行调用，因为配置了 @LoadBalanced
-        String url = "http://provider-service/user/get/" + id;
+        List<ServiceInstance> instances = discoveryClient.getInstances("provider-service");
+        ServiceInstance instance = instances.get(0);
+        String url = instance.getUri() + "/user/get/" + id;
         return restTemplate.getForObject(url, User.class);
     }
 }
